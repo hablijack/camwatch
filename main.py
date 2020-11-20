@@ -8,6 +8,7 @@ from telegram import Bot
 import os
 import io
 
+
 def watch_cam():
     telegram_bot_id = os.environ['TELEGRAM_BOT_ID']
     telegram_chat_id = os.environ['TELEGRAM_CHAT_ID']
@@ -20,7 +21,7 @@ def watch_cam():
 if __name__ == "__main__":
     watch_cam()
     scheduler = BlockingScheduler()
-    scheduler.add_job(watch_cam, 'interval', minutes=1)
+    scheduler.add_job(watch_cam, 'interval', seconds=30)
     try:
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):
