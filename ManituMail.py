@@ -21,9 +21,11 @@ class ManituMail:
             imapSession = imaplib.IMAP4_SSL(self.mail_server_url)
             imapSession.login(self.mail_server_addr, self.mail_server_pwd)
             imapSession.select('INBOX')
-            typ, data = imapSession.search(None,'(FROM "camera@diehabels.de" FROM "christoph.habel@googlemail.com")')
+            typ1, data1 = imapSession.search(None,'(FROM "camera@diehabels.de")')
+            typ2, data2 = imapSession.search(None, '(FROM "christoph.habel@googlemail.com")')
+            msg_id_array = data1[0].split() + data2[0].split()
 
-            for msgId in data[0].split():
+            for msgId in msg_id_array:
                 typ, messageParts = imapSession.fetch(msgId, '(RFC822)')
                 emailBody = messageParts[0][1]
                 raw_email_string = emailBody.decode('utf-8')
