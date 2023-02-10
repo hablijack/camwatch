@@ -1,28 +1,48 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from ManituMail import ManituMail
-#from FaceRecognition import FaceRecognition
-from apscheduler.schedulers.blocking import BlockingScheduler
 from telegram import Bot
+from waitress import serve
+from flask import Flask, request
+import requests
+from io import BytesIO
 import os
-import io
 
+app = Flask(__name__)
 
-def watch_cam():
-    telegram_bot_id = os.environ['TELEGRAM_BOT_ID']
-    telegram_chat_id = os.environ['TELEGRAM_CHAT_ID']
-    attachments = ManituMail().download_attachments()
-    #FaceRecognition().check_persons(attachments)
-    for photo in attachments:
-        bot = Bot(telegram_bot_id)
-        bot.send_photo(chat_id=telegram_chat_id, photo=io.BytesIO(photo['payload']))
+async def send_telegram_image(binary):
+    TELEGRAM_BOT_ID = os.environ['TELEGRAM_BOT_ID']
+    TELEGRAM_CHAT_ID = os.environ['TELEGRAM_CHAT_ID']
+    bot = Bot(TELEGRAM_BOT_ID)
+    await bot.send_photo(chat_id=TELEGRAM_CHAT_ID, photo=binary)
+
+async def fetch_current_webcam_image():
+    WEBCAM_HOST = os.environ['WEBCAM_HOST']
+    WEBCAM_USER = os.environ['WEBCAM_USER']
+    WEBCAM_PASSWORD = os.environ['WEBCAM_PASSWORD']
+    response = requests.get(
+        "http://" + WEBCAM_HOST + "/tmpfs/snap.jpg?usr=" + 
+        WEBCAM_USER + "admin&pwd=" + WEBCAM_PASSWORD)
+    return response
+
+@app.route('/upload_picture', methods=['POST'])
+async def upload_picture():
+    imagefile = request.files.get('imageFile')
+    send_telegram_image(BytesIO(imagefile.read()))
+    return {'msg': 'success'}
+
+@app.route('/send_alarm', methods=['GET'])
+async def send_alarm():
+    response = fetch_current_webcam_image()
+    send_telegram_image(BytesIO(response.content));
+    return {'msg': 'success'}
+
+@app.route('/health')
+def health():
+    return {'status': 'UP'}
 
 if __name__ == "__main__":
-    watch_cam()
-    scheduler = BlockingScheduler()
-    scheduler.add_job(watch_cam, 'interval', seconds=30)
     try:
-        scheduler.start()
+        serve(app, port=5000)
     except (KeyboardInterrupt, SystemExit):
         pass
