@@ -22,19 +22,19 @@ async def fetch_current_webcam_image():
     WEBCAM_PASSWORD = os.environ['WEBCAM_PASSWORD']
     response = requests.get(
         "http://" + WEBCAM_HOST + "/tmpfs/snap.jpg?usr=" + 
-        WEBCAM_USER + "admin&pwd=" + WEBCAM_PASSWORD)
+        WEBCAM_USER + "&pwd=" + WEBCAM_PASSWORD)
     return response
 
 @app.route('/upload_picture', methods=['POST'])
 async def upload_picture():
     imagefile = request.files.get('imageFile')
-    send_telegram_image(BytesIO(imagefile.read()))
+    await send_telegram_image(BytesIO(imagefile.read()))
     return {'msg': 'success'}
 
 @app.route('/send_alarm', methods=['GET'])
 async def send_alarm():
-    response = fetch_current_webcam_image()
-    send_telegram_image(BytesIO(response.content));
+    response = await fetch_current_webcam_image()
+    await send_telegram_image(BytesIO(response.content));
     return {'msg': 'success'}
 
 @app.route('/health')
