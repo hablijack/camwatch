@@ -1,4 +1,4 @@
-FROM python:3.11.2-slim
+FROM python:3-slim
 COPY ./main.py /app/main.py
 COPY ./requirements.txt /app/requirements.txt
 WORKDIR /app
