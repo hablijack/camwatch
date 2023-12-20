@@ -1,7 +1,12 @@
 
 FROM animcogn/face_recognition:latest
 
-RUN apt-get -y update && apt-get -y upgrade && apt-get install -y --fix-missing ffmpeg && apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/
+RUN apt-get -y update 
+RUN apt-get -y upgrade 
+RUN apt-get install -y --fix-missing ffmpeg 
+RUN apt-get clean autoclean 
+RUN apt-get autoremove --yes 
+RUN rm -rf /var/lib/apt /var/lib/dpkg /var/lib/apt/cache /var/lib/log
 
 ADD app /app
 WORKDIR /app
