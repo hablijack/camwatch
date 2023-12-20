@@ -1,5 +1,5 @@
 # Builder Image
-FROM python:3.8-slim AS compile
+FROM python:3.8-slim-buster AS compile
 
 # Install Dependencies
 RUN apt-get -y update && apt-get install -y --fix-missing \
@@ -39,8 +39,9 @@ RUN pip3 install --upgrade pip && \
 
 RUN pip3 install face_recognition
 
+
 # Runtime Image
-FROM python:3.8-slim
+FROM python:3.8-slim-buster
 
 COPY --from=compile /opt/venv /opt/venv
 COPY --from=compile \
