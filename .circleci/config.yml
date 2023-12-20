@@ -9,12 +9,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Build and push Docker Base Image to Dockerhub
-          command: |
-            docker build -f Dockerfile.basic-image -t hablijack/camwatch-base:1.0.0 .
-            echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-            docker push hablijack/camwatch-base:1.0.0
-      - run:
           name: Build and push Docker Image to Dockerhub
           command: |
             docker build -t hablijack/camwatch:1.28.0 .
