@@ -1,11 +1,13 @@
-FROM python:3-slim
-RUN apt-get update
-# for dlib
-RUN apt-get install -y build-essential cmake
-# cleanup
-RUN rm -rf /var/lib/apt/lists/*
+
+FROM animcogn/face_recognition:latest
+
+RUN apt-get -y update && apt-get -y upgrade && apt-get install -y --fix-missing ffmpeg && apt-get clean autoclean && apt-get autoremove --yes && rm -rf /var/lib/{apt,dpkg,cache,log}/
+
 ADD app /app
 WORKDIR /app
-RUN pip install -r requirements.txt
+
+# Install requirements
+RUN pip3 install -r requirements.txt
+
 EXPOSE 5000
 CMD python ./main.py

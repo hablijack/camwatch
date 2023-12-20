@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import face_recognition
-import cv2
+import ffmpegcv
 import logging
 from library.Configuration import Configuration
 from pathlib import Path
@@ -28,11 +28,11 @@ class FaceRecognition:
         face_encodings = []
         found_face_names = []
         process_this_frame = True
-        video_capture = cv2.VideoCapture(self.config.mobile_camera_stream_url())
+        video_capture = ffmpegcv.VideoCapture(self.config.mobile_camera_stream_url())
         while True:
             ret, frame = video_capture.read()
             if process_this_frame:
-                rgb_small_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB) 
+                rgb_small_frame = ffmpegcv.cvtColor(frame, ffmpegcv.COLOR_BGR2RGB) 
 
                 face_locations = face_recognition.face_locations(rgb_small_frame)
                 face_encodings = face_recognition.face_encodings(rgb_small_frame, face_locations)
