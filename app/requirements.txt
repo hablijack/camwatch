@@ -1,0 +1,9 @@
+python-telegram-bot
+waitress
+requests
+flask[async]
+flask-executor
+face_recognition
+Pillow
+opencv-python
+python-dotenv
