@@ -11,9 +11,9 @@ jobs:
       - run:
           name: Build and push Docker Image to Dockerhub
           command: |
-            docker build -t hablijack/camwatch:1.29.0 .
+            docker build -t hablijack/camwatch:1.29.1 .
             echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
-            docker push hablijack/camwatch:1.29.0
+            docker push hablijack/camwatch:1.29.1
 
 workflows:
   version: 2
