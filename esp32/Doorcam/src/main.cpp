@@ -2,38 +2,32 @@
 #include "Arduino.h"
 #include "soc/soc.h"           // Disable brownour problems
 #include "soc/rtc_cntl_reg.h"  // Disable brownour problems
-#include "driver/rtc_io.h"
 #include <EEPROM.h>            // read and write from flash memory
 #include <WiFi.h>
-#include "driver/adc.h"
 
-// DEEP SLEEP WAKEUP PIN
-#define BUTTON_PIN_BITMASK (1ULL << GPIO_NUM_13)
-
-// Pin definition for CAMERA_MODEL_AI_THINKER
-#define PWDN_GPIO_NUM     32
-#define RESET_GPIO_NUM    -1
-#define XCLK_GPIO_NUM      0
-#define SIOD_GPIO_NUM     26
-#define SIOC_GPIO_NUM     27
-#define Y9_GPIO_NUM       35
-#define Y8_GPIO_NUM       34
-#define Y7_GPIO_NUM       39
-#define Y6_GPIO_NUM       36
-#define Y5_GPIO_NUM       21
-#define Y4_GPIO_NUM       19
-#define Y3_GPIO_NUM       18
-#define Y2_GPIO_NUM        5
-#define VSYNC_GPIO_NUM    25
-#define HREF_GPIO_NUM     23
-#define PCLK_GPIO_NUM     22
+#define PWDN_GPIO_NUM    -1
+#define RESET_GPIO_NUM   -1
+#define XCLK_GPIO_NUM    4
+#define SIOD_GPIO_NUM    18
+#define SIOC_GPIO_NUM    23
+#define Y9_GPIO_NUM      36
+#define Y8_GPIO_NUM      37
+#define Y7_GPIO_NUM      38
+#define Y6_GPIO_NUM      39
+#define Y5_GPIO_NUM      35
+#define Y4_GPIO_NUM      14
+#define Y3_GPIO_NUM      13
+#define Y2_GPIO_NUM      34
+#define VSYNC_GPIO_NUM   5
+#define HREF_GPIO_NUM    27
+#define PCLK_GPIO_NUM    25
 
 WiFiClient client;
-const char *SSID = "SSID";
-const char *PWD = "PWD";
+const char *SSID = "XXX";
+const char *PWD = "XXXXXXXXX";
 
-String SERVER_NAME = "192.168.178.29";
-String SERVER_PATH = "/upload_picture";
+String SERVER_NAME = "192.168.178.162";
+String SERVER_PATH = "/door_alarm";
 int SERVER_PORT = 5000;
 
 void setup() {
@@ -57,8 +51,8 @@ void setup() {
   config.pin_pclk = PCLK_GPIO_NUM;
   config.pin_vsync = VSYNC_GPIO_NUM;
   config.pin_href = HREF_GPIO_NUM;
-  config.pin_sscb_sda = SIOD_GPIO_NUM;
-  config.pin_sscb_scl = SIOC_GPIO_NUM;
+  config.pin_sccb_sda = SIOD_GPIO_NUM;
+  config.pin_sccb_scl = SIOC_GPIO_NUM;
   config.pin_pwdn = PWDN_GPIO_NUM;
   config.pin_reset = RESET_GPIO_NUM;
   config.xclk_freq_hz = 20000000;
@@ -81,11 +75,23 @@ void setup() {
     return;
   }
 
-  delay(500);
+  // Configure the Camera
+  sensor_t * s = esp_camera_sensor_get();
+  s->set_gain_ctrl(s, 1);                       // auto gain on
+  s->set_exposure_ctrl(s, 1);                   // auto exposure on
+  s->set_awb_gain(s, 1);                        // Auto White Balance enable (0 or 1)
+  s->set_brightness(s, 1);                     // (-2 to 2) - set brightness
+  s->set_wb_mode(s,0);
+  s->set_contrast(s,1);
+
   camera_fb_t * fb = NULL;
  
-  // Take Picture with Camera
-  fb = esp_camera_fb_get();  
+  // Take Pictures with the Camera to let the auto-correction calibrate
+  fb = esp_camera_fb_get();
+  esp_camera_fb_return(fb);
+
+  // Take the real picture
+  fb = esp_camera_fb_get();
   if(!fb) {
     Serial.println("Camera capture failed");
     return;
@@ -96,8 +102,6 @@ void setup() {
     Serial.print(".");
     delay(500);
   }
-  delay(500);
-
 
   // PICTURE SEND START
   String getAll;
@@ -105,8 +109,8 @@ void setup() {
   Serial.println("Connecting to server: " + SERVER_NAME);
   if (client.connect(SERVER_NAME.c_str(), SERVER_PORT)) {
     Serial.println("Connection successful!");    
-    String head = "--RandomNerdTutorials\r\nContent-Disposition: form-data; name=\"imageFile\"; filename=\"esp32-cam.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n";
-    String tail = "\r\n--RandomNerdTutorials--\r\n";
+    String head = "--HabelDoorcam\r\nContent-Disposition: form-data; name=\"imageFile\"; filename=\"doorcam.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n";
+    String tail = "\r\n--HabelDoorcam--\r\n";
 
     uint32_t imageLen = fb->len;
     uint32_t extraLen = head.length() + tail.length();
@@ -115,7 +119,7 @@ void setup() {
     client.println("POST " + SERVER_PATH + " HTTP/1.1");
     client.println("Host: " + SERVER_NAME);
     client.println("Content-Length: " + String(totalLen));
-    client.println("Content-Type: multipart/form-data; boundary=RandomNerdTutorials");
+    client.println("Content-Type: multipart/form-data; boundary=HabelDoorcam");
     client.println();
     client.print(head);
   
@@ -132,7 +136,8 @@ void setup() {
       }
     }   
     client.print(tail);
-    
+    esp_camera_fb_return(fb);
+
     int timoutTimer = 10000;
     long startTimer = millis();
     boolean state = false;
@@ -157,17 +162,8 @@ void setup() {
     Serial.println(getBody);
   }
   // PICTURE SEND FINISHED
-
-  esp_camera_fb_return(fb);
-  delay(500);
-  esp_sleep_enable_ext1_wakeup(BUTTON_PIN_BITMASK, ESP_EXT1_WAKEUP_ALL_LOW);
-  Serial.println("Going to sleep now.");
-  delay(500);
-  adc_power_off();
-  esp_deep_sleep_start();
-  Serial.println("This will never be printed");
 }
  
 void loop() {
- 
+ yield();
 }

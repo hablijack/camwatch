@@ -4,5 +4,6 @@ requests
 flask[async]
 flask-executor
 face_recognition
-ffmpegcv
 python-dotenv
+Pillow
+numpy
