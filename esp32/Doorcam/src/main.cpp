@@ -24,7 +24,7 @@
 
 WiFiClient client;
 const char *SSID = "XXX";
-const char *PWD = "XXXXXXXXX";
+const char *PWD = "XXXXXXXX";
 
 String SERVER_NAME = "192.168.178.162";
 String SERVER_PATH = "/door_alarm";
@@ -165,5 +165,5 @@ void setup() {
 }
  
 void loop() {
- yield();
+  ESP.deepSleep(60 * 1000000); 
 }
