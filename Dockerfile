@@ -25,12 +25,6 @@ RUN apt-get install -y --fix-missing \
     zip \
     && apt-get clean && rm -rf /tmp/* /var/tmp/*
 
-RUN cd ~ && \
-    mkdir -p dlib && \
-    git clone --branch 'v19.24.6' --single-branch https://github.com/davisking/dlib.git dlib/ && \
-    cd  dlib/ && \
-    python3 setup.py install
-
 ADD app /app
 WORKDIR /app
 
