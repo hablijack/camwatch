@@ -1,6 +1,6 @@
 python-telegram-bot==22.7
 waitress==3.0.2
-requests==2.34.0
+requests==2.34.1
 flask[async]==3.1.3
 Flask-Executor==1.0.0
 uniface
