@@ -6,4 +6,4 @@ Flask-Executor==1.0.0
 uniface
 python-dotenv==1.2.3
 Pillow==12.3.0
-numpy==2.5.2
+numpy==2.5.3
